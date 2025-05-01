@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use Hash;
-use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\LoginFormRequest;
-use Illuminate\Routing\Controllers\Middleware;
+use App\Models\User;
+use Hash;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
 class AuthController extends Controller implements HasMiddleware
 {
-
     public static function middleware()
     {
         return [
             new Middleware('auth:sanctum', only: ['logout']),
         ];
     }
+
     public function login(LoginFormRequest $request)
     {
         $user = User::where('email', $request->email)->first();
@@ -32,7 +32,7 @@ class AuthController extends Controller implements HasMiddleware
 
         return response()->json([
             'user' => $user,
-            'token' => $token
+            'token' => $token,
         ]);
     }
 
