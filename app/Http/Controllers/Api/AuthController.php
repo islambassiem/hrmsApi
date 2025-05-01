@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\LoginFormRequest;
+use App\Http\Requests\LoginFormRequest;
 use App\Models\User;
 use Hash;
 use Illuminate\Routing\Controllers\HasMiddleware;
