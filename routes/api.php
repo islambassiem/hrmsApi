@@ -14,4 +14,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
 });
 
-Route::apiResource('entity', EntityController::class);
+Route::apiResource('entity', EntityController::class)
+    ->except('destroy')
+    ->middleware('auth:sanctum');

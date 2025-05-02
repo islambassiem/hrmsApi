@@ -25,8 +25,8 @@ class StoreEntityRequest extends FormRequest
             'name_en' => ['required', 'string', 'max:100'],
             'name_ar' => ['required', 'string', 'max:100'],
             'code' => ['required', 'string', 'max:10'],
-            'created_by' => ['exists:users'],
-            'updated_by' => ['exists:users'],
+            'created_by' => ['exists:users,id'],
+            'updated_by' => ['exists:users,id'],
         ];
     }
 }
