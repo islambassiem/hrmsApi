@@ -13,7 +13,7 @@ class IndexEntityAction
         Gate::authorize('access', Entity::class);
 
         return Cache::rememberForever('entities', function () {
-            return Entity::with('createdBy', 'updatedBy')->get();
+            return Entity::with('createdBy', 'updatedBy')->paginate();
         });
     }
 }

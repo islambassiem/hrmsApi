@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Actions\Entity\IndexEntityAction;
 use App\Actions\Entity\ShowEntityAction;
 use App\Actions\Entity\StoreEntityAction;
 use App\Actions\Entity\UpdateEntityAction;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEntityRequest;
 use App\Http\Requests\UpdateEntityRequest;
 use App\Http\Resources\EntityResource;
@@ -21,7 +22,13 @@ class EntityController extends Controller
     {
         $entities = $action->handle();
 
-        return EntityResource::collection($entities);
+        if ($entities->count() > 0) {
+            return EntityResource::collection($entities);
+        }
+
+        return response()->json([
+            'message' => 'There is no content',
+        ]);
     }
 
     /**
@@ -29,7 +36,8 @@ class EntityController extends Controller
      */
     public function store(StoreEntityRequest $request, StoreEntityAction $action)
     {
-        return $action->handle(Auth::user(), $request->validated());
+        $entity = $action->handle(Auth::user(), $request->validated());
+        return EntityResource::make($entity);
     }
 
     /**

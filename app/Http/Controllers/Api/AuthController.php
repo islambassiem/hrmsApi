@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginFormRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Hash;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -31,7 +32,7 @@ class AuthController extends Controller implements HasMiddleware
         $token = $user->createToken(time())->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => UserResource::make($user),
             'token' => $token,
         ]);
     }
@@ -40,8 +41,6 @@ class AuthController extends Controller implements HasMiddleware
     {
         auth()->user()->tokens()->delete();
 
-        return response()->json(
-            ['message' => 'Successfully logged out']
-        );
+        return response()->noContent();
     }
 }
