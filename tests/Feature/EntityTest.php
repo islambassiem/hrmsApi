@@ -36,7 +36,7 @@ test('unauthorized users cannot access sigle entity page', function () {
         ->assertStatus(403);
 });
 
-test('authenticated and authorized users can see a single entity page', function (){
+test('authenticated and authorized users can see a single entity page', function () {
     $entity = Entity::factory()->create();
     $role = Role::create(['name' => 'admin']);
     $this->user->assignRole($role->name);
@@ -55,7 +55,7 @@ test('authenticated and authorized users can see a single entity page', function
                 'updated_by' => ['id', 'name', 'email'],
                 'created_at',
                 'updated_at',
-            ]
+            ],
         ]);
 });
 
@@ -111,25 +111,25 @@ test('authenticated and authorized users can access entities page', function () 
         ]);
 });
 
-test('anauthenticated and authorized users cannot store entity', function (){
+test('anauthenticated and authorized users cannot store entity', function () {
     $entity = Entity::factory()->make()->toArray();
     $this
         ->postJson('api/v1/entities', $entity)
         ->assertStatus(401);
-    ;
+
 });
 
-test('authorized users cannot store entities', function (){
+test('authorized users cannot store entities', function () {
     $entity = Entity::factory()->make()->toArray();
     $user = User::factory()->create();
     $this
         ->actingAs($user)
         ->postJson('api/v1/entities', $entity)
         ->assertStatus(403);
-    ;
+
 });
 
-test('authorized users cannot store entity with invalid data', function (){
+test('authorized users cannot store entity with invalid data', function () {
     $entity = [
         'name_en' => '',
         'name_ar' => '',
@@ -145,10 +145,10 @@ test('authorized users cannot store entity with invalid data', function (){
         ->actingAs($user)
         ->postJson('api/v1/entities', $entity)
         ->assertStatus(422);
-    ;
+
 });
 
-test('authorized users can store entity with valid data', function (){
+test('authorized users can store entity with valid data', function () {
     $entity = Entity::factory()->create([
         'created_by' => $this->user->id,
         'updated_by' => $this->user->id,
@@ -162,14 +162,14 @@ test('authorized users can store entity with valid data', function (){
         ->assertStatus(201);
 });
 
-test('unauthenticated and unauthorized users cannot update an entity', function (){
+test('unauthenticated and unauthorized users cannot update an entity', function () {
     $entity = Entity::factory()->create();
     $this
-        ->putJson('api/v1/entities/'.$entity->id)
+        ->putJson('api/v1/entities/'.$entity->id, [])
         ->assertStatus(401);
 });
 
-test('unauthorized users cannot update an entity', function (){
+test('unauthorized users cannot update an entity', function () {
     $entity = Entity::factory()->create();
 
     $data = [
@@ -184,8 +184,7 @@ test('unauthorized users cannot update an entity', function (){
         ->assertStatus(403);
 });
 
-
-test('authorized users cannot update an entity with invalid data', function (){
+test('authorized users cannot update an entity with invalid data', function () {
     $entity = Entity::factory()->create();
     $role = Role::create(['name' => 'admin']);
     $this->user->assignRole($role->name);
@@ -201,8 +200,7 @@ test('authorized users cannot update an entity with invalid data', function (){
         ->assertStatus(422);
 });
 
-
-test('authorized users can update an entity', function (){
+test('authorized users can update an entity', function () {
     $entity = Entity::factory()->create();
     $role = Role::create(['name' => 'admin']);
     $this->user->assignRole($role->name);
@@ -227,6 +225,6 @@ test('authorized users can update an entity', function (){
                 'updated_by' => ['id', 'name', 'email'],
                 'created_at',
                 'updated_at',
-            ]
+            ],
         ]);
 });

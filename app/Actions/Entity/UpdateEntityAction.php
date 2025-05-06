@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Gate;
 
 class UpdateEntityAction
 {
-    public function handle(Entity $entity, User $user, array $data)
+    public function handle(Entity $entity, User $user, array $data): Entity
     {
         Gate::authorize('access', Entity::class);
         $data['updated_by'] = $user->id;

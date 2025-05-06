@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Actions\Entity;
+namespace App\Actions\Branch;
 
-use App\Models\Entity;
+use App\Models\Branch;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 
-class IndexEntityAction
+class IndexBranchAction
 {
     public function handle(): LengthAwarePaginator
     {
-        Gate::authorize('access', Entity::class);
+        Gate::authorize('access', Branch::class);
 
         return Cache::rememberForever('entities', function () {
-            return Entity::with('createdBy', 'updatedBy')->paginate();
+            return Branch::with('createdBy', 'updatedBy')->paginate();
         });
     }
 }

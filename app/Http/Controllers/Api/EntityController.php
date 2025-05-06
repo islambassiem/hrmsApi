@@ -37,6 +37,7 @@ class EntityController extends Controller
     public function store(StoreEntityRequest $request, StoreEntityAction $action)
     {
         $entity = $action->handle(Auth::user(), $request->validated());
+
         return EntityResource::make($entity);
     }
 

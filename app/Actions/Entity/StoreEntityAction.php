@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Gate;
 
 class StoreEntityAction
 {
-    public function handle(User $user, array $data)
+    public function handle(User $user, array $data): Entity
     {
         Gate::authorize('access', Entity::class);
 
