@@ -11,6 +11,6 @@ class ShowBranchAction
     {
         Gate::authorize('access', $branch);
 
-        return $branch->load(['entity.createdBy', 'entity.updatedBy','createdBy', 'updatedBy']);
+        return $branch->load(['entity.createdBy', 'entity.updatedBy', 'createdBy', 'updatedBy']);
     }
 }

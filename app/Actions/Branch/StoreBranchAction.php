@@ -12,7 +12,6 @@ class StoreBranchAction
     {
         Gate::authorize('access', Branch::class);
 
-        $attributes['created_by'] = $user->id;
         $attributes['updated_by'] = $user->id;
 
         return Branch::create($attributes);

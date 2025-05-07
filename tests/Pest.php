@@ -1,5 +1,10 @@
 <?php
 
+use App\Models\Branch;
+use App\Models\Entity;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -41,7 +46,35 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function user(): User
 {
-    // ..
+    return User::factory()->create();
+}
+
+function entity(?User $user = null): Entity
+{
+    $user ??= user();
+
+    return Entity::factory()->create([
+        'created_by' => $user->id,
+        'updated_by' => $user->id,
+    ]);
+}
+
+function branch(?Entity $entity = null, ?User $user = null): Branch
+{
+    $user ??= user();
+    $entity ??= entity();
+
+    return Branch::factory()->create([
+        'entity_id' => $entity->id,
+        'created_by' => $user->id,
+        'updated_by' => $user->id,
+    ]);
+}
+
+function assignAdmin(User $user): void
+{
+    $role = Role::create(['name' => 'admin']);
+    $user->assignRole($role->name);
 }

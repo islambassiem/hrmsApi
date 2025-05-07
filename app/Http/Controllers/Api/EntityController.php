@@ -11,10 +11,19 @@ use App\Http\Requests\StoreEntityRequest;
 use App\Http\Requests\UpdateEntityRequest;
 use App\Http\Resources\EntityResource;
 use App\Models\Entity;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 
-class EntityController extends Controller
+class EntityController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(['auth:sanctum']),
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */

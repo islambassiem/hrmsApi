@@ -13,10 +13,19 @@ use App\Http\Resources\BranchResource;
 use App\Models\Branch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 
-class BranchController extends Controller
+class BranchController extends Controller implements HasMiddleware
 {
+    public static function middleware()
+    {
+        return [
+            new Middleware(['auth:sanctum']),
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */

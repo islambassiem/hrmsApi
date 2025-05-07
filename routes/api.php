@@ -15,10 +15,5 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
 });
 
-Route::apiResource('entities', EntityController::class)
-    ->except('destroy')
-    ->middleware('auth:sanctum');
-
-Route::apiResource('branches', BranchController::class)
-    ->except('destroy')
-    ->middleware('auth:sanctum');
+Route::apiResource('entities', EntityController::class)->except('destroy');
+Route::apiResource('branches', BranchController::class)->except('destroy');

@@ -3,18 +3,18 @@
 namespace App\Actions\Entity;
 
 use App\Models\Entity;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 
 class IndexEntityAction
 {
-    public function handle(): LengthAwarePaginator
+    public function handle(): Collection
     {
         Gate::authorize('access', Entity::class);
 
         return Cache::rememberForever('entities', function () {
-            return Entity::with('createdBy', 'updatedBy')->paginate();
+            return Entity::with('createdBy', 'updatedBy')->get();
         });
     }
 }

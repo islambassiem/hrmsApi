@@ -1,230 +1,216 @@
 <?php
 
-use App\Models\Entity;
-use App\Models\User;
-use Spatie\Permission\Models\Role;
+describe('Authentication', function () {
 
-beforeEach(function () {
-    $this->user = User::factory()->create();
+    test('guests cannot access entities page', function () {
+        $this
+            ->getJson(route('entities.index'))
+            ->assertStatus(401);
+    });
+
+    test('guests cannot access sigle entity page', function () {
+        $entity = entity();
+        $this
+            ->getJson(route('entities.show', $entity->id))
+            ->assertStatus(401);
+    });
+
+    test('guest cannot update an entity', function () {
+        $entity = entity();
+        $this
+            ->putJson(route('entities.update', $entity->id), [])
+            ->assertStatus(401);
+    });
+
+    test('guests cannot store entity', function () {
+        $entity = entity();
+        $this
+            ->postJson(route('entities.store'), $entity->toArray())
+            ->assertStatus(401);
+
+    });
+
 });
 
-test('unauthenticated users cannot access entities page', function () {
-    $this
-        ->getJson('/api/v1/entities')
-        ->assertStatus(401);
+describe('Authorization', function () {
+
+    test('authenticated users cannot access entities page', function () {
+        $user = user();
+        $entity = entity($user);
+        $this
+            ->actingAs($user)
+            ->getJson(route('entities.show', $entity->id))
+            ->assertStatus(403);
+    });
+
+    test('authenticated users cannot access sigle entity page', function () {
+        $user = user();
+        $entity = entity($user);
+        $this
+            ->actingAs($user)
+            ->getJson(route('entities.show', $entity->id))
+            ->assertStatus(403);
+    });
+
+    test('authenticated users cannot store entities', function () {
+        $user = user();
+        $entity = entity($user);
+        $this
+            ->actingAs($user)
+            ->postJson(route('entities.store'), $entity->toArray())
+            ->assertStatus(403);
+
+    });
+
+    test('unauthorized users cannot update an entity', function () {
+        $user = user();
+        $entity = entity($user);
+
+        $data = [
+            'name_en' => 'name_en',
+            'name_ar' => 'name_ar',
+            'code' => '1234567890',
+        ];
+
+        $this
+            ->actingAs($user)
+            ->putJson(route('entities.update', $entity->id), $data)
+            ->assertStatus(403);
+    });
+
 });
 
-test('unauthenticated users cannot access sigle entity page', function () {
-    $entity = Entity::factory()->create();
-    $this
-        ->getJson('api/v1/entities/'.$entity->id)
-        ->assertStatus(401);
-});
+describe('authorized users', function () {
 
-test('unauthorized users cannot access entities page', function () {
-    $entity = Entity::factory()->create();
-    $this
-        ->actingAs($this->user)
-        ->getJson('api/v1/entities/'.$entity->id)
-        ->assertStatus(403);
-});
+    test('authorized users can see no content message with empty page', function () {
+        $user = user();
+        assignAdmin($user);
+        $this
+            ->actingAs($user)
+            ->getJson(route('entities.index'))
+            ->assertStatus(200)
+            ->assertExactJsonStructure([
+                'message',
+            ]);
+    });
 
-test('unauthorized users cannot access sigle entity page', function () {
-    $this
-        ->actingAs($this->user)
-        ->getJson('/api/v1/entities')
-        ->assertStatus(403);
-});
+    test('authorized users can access entities page', function () {
 
-test('authenticated and authorized users can see a single entity page', function () {
-    $entity = Entity::factory()->create();
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
+        $user = user();
+        $entity = entity($user);
+        assignAdmin($user);
+        $this
+            ->actingAs($user)
+            ->getJson(route('entities.index'))
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertExactJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name_en',
+                        'name_ar',
+                        'code',
+                        'created_at',
+                        'updated_at',
+                        'created_by' => ['id', 'name', 'email'],
+                        'updated_by' => ['id', 'name', 'email'],
+                    ],
+                ],
+            ]);
+    });
 
-    $this
-        ->actingAs($this->user)
-        ->getJson('api/v1/entities/'.$entity->id)
-        ->assertStatus(200)
-        ->assertExactJsonStructure([
-            'data' => [
-                'id',
-                'name_en',
-                'name_ar',
-                'code',
-                'created_by' => ['id', 'name', 'email'],
-                'updated_by' => ['id', 'name', 'email'],
-                'created_at',
-                'updated_at',
-            ],
-        ]);
-});
-
-test('authenticated and authorized users can see no content message with empty page', function () {
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
-
-    $this
-        ->actingAs($this->user)
-        ->getJson('/api/v1/entities')
-        ->assertStatus(200)
-        ->assertJson([
-            'message' => 'There is no content',
-        ]);
-});
-
-test('authenticated and authorized users can access entities page', function () {
-    Entity::factory()->create();
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
-
-    $this
-        ->actingAs($this->user)
-        ->getJson('/api/v1/entities')
-        ->assertStatus(200)
-        ->assertJsonCount(1, 'data')
-        ->assertExactJsonStructure([
-            'data' => [
-                '*' => [
+    test('authorized users can see a single entity page', function () {
+        $user = user();
+        $entity = entity($user);
+        assignAdmin($user);
+        $this
+            ->actingAs($user)
+            ->getJson(route('entities.show', $entity->id))
+            ->assertStatus(200)
+            ->assertExactJsonStructure([
+                'data' => [
                     'id',
                     'name_en',
                     'name_ar',
                     'code',
-                    'created_at',
-                    'updated_at',
                     'created_by' => ['id', 'name', 'email'],
                     'updated_by' => ['id', 'name', 'email'],
+                    'created_at',
+                    'updated_at',
                 ],
-            ],
-            'links' => ['first', 'last', 'prev', 'next'],
-            'meta' => [
-                'current_page',
-                'from',
-                'last_page',
-                'path',
-                'per_page',
-                'to',
-                'total',
-                'links' => [
-                    '*' => ['url', 'label', 'active'],
+            ]);
+    });
+
+    test('authorized users cannot store entity with invalid data', function () {
+        $entity = [
+            'name_en' => '',
+            'name_ar' => '',
+            'code' => '',
+            'created_by' => '',
+            'updated_by' => '',
+        ];
+        $user = user();
+        assignAdmin($user);
+
+        $this
+            ->actingAs($user)
+            ->postJson(route('entities.store'), $entity)
+            ->assertStatus(422);
+
+    });
+
+    test('authorized users can store entity with valid data', function () {
+        $user = user();
+        $entity = entity($user);
+        assignAdmin($user);
+        $this
+            ->actingAs($user)
+            ->postJson(route('entities.store'), $entity->toArray())
+            ->assertStatus(201);
+    });
+
+    test('authorized users cannot update an entity with invalid data', function () {
+        $user = user();
+        $entity = entity($user);
+        assignAdmin($user);
+        $data = [
+            'name_en' => '',
+            'name_ar' => '',
+            'code' => '',
+        ];
+
+        $this
+            ->actingAs($user)
+            ->putJson(route('entities.update', $entity->id), $data)
+            ->assertStatus(422);
+    });
+
+    test('authorized users can update an entity', function () {
+        $user = user();
+        $entity = entity($user);
+        assignAdmin($user);
+        $data = [
+            'name_en' => 'name_en',
+            'name_ar' => 'name_ar',
+            'code' => '1234567890',
+        ];
+
+        $this
+            ->actingAs($user)
+            ->putJson(route('entities.update', $entity->id), $data)
+            ->assertStatus(200)
+            ->assertExactJsonStructure([
+                'data' => [
+                    'id',
+                    'name_en',
+                    'name_ar',
+                    'code',
+                    'created_by' => ['id', 'name', 'email'],
+                    'updated_by' => ['id', 'name', 'email'],
+                    'created_at',
+                    'updated_at',
                 ],
-            ],
-        ]);
-});
-
-test('anauthenticated and authorized users cannot store entity', function () {
-    $entity = Entity::factory()->make()->toArray();
-    $this
-        ->postJson('api/v1/entities', $entity)
-        ->assertStatus(401);
-
-});
-
-test('authorized users cannot store entities', function () {
-    $entity = Entity::factory()->make()->toArray();
-    $user = User::factory()->create();
-    $this
-        ->actingAs($user)
-        ->postJson('api/v1/entities', $entity)
-        ->assertStatus(403);
-
-});
-
-test('authorized users cannot store entity with invalid data', function () {
-    $entity = [
-        'name_en' => '',
-        'name_ar' => '',
-        'code' => '',
-        'created_by' => '',
-        'updated_by' => '',
-    ];
-    $user = User::factory()->create();
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
-
-    $this
-        ->actingAs($user)
-        ->postJson('api/v1/entities', $entity)
-        ->assertStatus(422);
-
-});
-
-test('authorized users can store entity with valid data', function () {
-    $entity = Entity::factory()->create([
-        'created_by' => $this->user->id,
-        'updated_by' => $this->user->id,
-    ])->toArray();
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
-
-    $this
-        ->actingAs($this->user)
-        ->postJson('api/v1/entities', $entity)
-        ->assertStatus(201);
-});
-
-test('unauthenticated and unauthorized users cannot update an entity', function () {
-    $entity = Entity::factory()->create();
-    $this
-        ->putJson('api/v1/entities/'.$entity->id, [])
-        ->assertStatus(401);
-});
-
-test('unauthorized users cannot update an entity', function () {
-    $entity = Entity::factory()->create();
-
-    $data = [
-        'name_en' => 'name_en',
-        'name_ar' => 'name_ar',
-        'code' => '1234567890',
-    ];
-
-    $this
-        ->actingAs($this->user)
-        ->putJson('api/v1/entities/'.$entity->id, $data)
-        ->assertStatus(403);
-});
-
-test('authorized users cannot update an entity with invalid data', function () {
-    $entity = Entity::factory()->create();
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
-    $data = [
-        'name_en' => '',
-        'name_ar' => '',
-        'code' => '',
-    ];
-
-    $this
-        ->actingAs($this->user)
-        ->putJson('api/v1/entities/'.$entity->id, $data)
-        ->assertStatus(422);
-});
-
-test('authorized users can update an entity', function () {
-    $entity = Entity::factory()->create();
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
-
-    $data = [
-        'name_en' => 'name_en',
-        'name_ar' => 'name_ar',
-        'code' => '1234567890',
-    ];
-
-    $this
-        ->actingAs($this->user)
-        ->putJson('api/v1/entities/'.$entity->id, $data)
-        ->assertStatus(200)
-        ->assertExactJsonStructure([
-            'data' => [
-                'id',
-                'name_en',
-                'name_ar',
-                'code',
-                'created_by' => ['id', 'name', 'email'],
-                'updated_by' => ['id', 'name', 'email'],
-                'created_at',
-                'updated_at',
-            ],
-        ]);
+            ]);
+    });
 });

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Observers\BranchObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
+#[ObservedBy(BranchObserver::class)]
 class Branch extends Model
 {
     /** @use HasFactory<\Database\Factories\BranchFactory> */
