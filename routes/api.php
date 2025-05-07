@@ -11,8 +11,8 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::controller(AuthController::class)->group(function () {
-    Route::post('login', 'login');
-    Route::post('logout', 'logout');
+    Route::post('login', 'login')->name('login');
+    Route::post('logout', 'logout')->name('logout');
 });
 
 Route::apiResource('entities', EntityController::class)->except('destroy');

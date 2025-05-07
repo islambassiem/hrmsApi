@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 describe('Authentication', function () {
 
     test('guests cannot access entities page', function () {
@@ -27,9 +29,7 @@ describe('Authentication', function () {
         $this
             ->postJson(route('entities.store'), $entity->toArray())
             ->assertStatus(401);
-
     });
-
 });
 
 describe('Authorization', function () {
@@ -59,7 +59,6 @@ describe('Authorization', function () {
             ->actingAs($user)
             ->postJson(route('entities.store'), $entity->toArray())
             ->assertStatus(403);
-
     });
 
     test('unauthorized users cannot update an entity', function () {
@@ -77,7 +76,6 @@ describe('Authorization', function () {
             ->putJson(route('entities.update', $entity->id), $data)
             ->assertStatus(403);
     });
-
 });
 
 describe('authorized users', function () {
@@ -142,23 +140,15 @@ describe('authorized users', function () {
             ]);
     });
 
-    test('authorized users cannot store entity with invalid data', function () {
-        $entity = [
-            'name_en' => '',
-            'name_ar' => '',
-            'code' => '',
-            'created_by' => '',
-            'updated_by' => '',
-        ];
+    test('authorized users cannot store entity with invalid data', function ($entity) {
         $user = user();
         assignAdmin($user);
 
         $this
             ->actingAs($user)
-            ->postJson(route('entities.store'), $entity)
+            ->postJson(route('entities.store'), [$entity])
             ->assertStatus(422);
-
-    });
+    })->with('entities');
 
     test('authorized users can store entity with valid data', function () {
         $user = user();
@@ -214,3 +204,33 @@ describe('authorized users', function () {
             ]);
     });
 });
+
+dataset('entities', [
+    'all empty' => [
+        [
+            'name_en' => '',
+            'name_ar' => '',
+            'code' => '',
+            'created_by' => '',
+            'updated_by' => '',
+        ],
+    ],
+    'names too long' => [
+        [
+            'name_en' => Str::length(51),
+            'name_ar' => Str::length(51),
+            'code' => Str::length(10),
+            'created_by' => 100,
+            'updated_by' => 100,
+        ],
+    ],
+    'missing code' => [
+        [
+            'name_en' => Str::length(20),
+            'name_ar' => Str::length(20),
+            'code' => null,
+            'created_by' => 100,
+            'updated_by' => 100,
+        ],
+    ],
+]);

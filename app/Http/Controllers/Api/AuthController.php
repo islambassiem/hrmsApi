@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginFormRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use Hash;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller implements HasMiddleware
 {
@@ -25,8 +25,8 @@ class AuthController extends Controller implements HasMiddleware
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
-                'error' => 'The redientails are not correct',
-            ]);
+                'error' => 'The Credientails are not correct',
+            ], 422);
         }
 
         $token = $user->createToken(time())->plainTextToken;
