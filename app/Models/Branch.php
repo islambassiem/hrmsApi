@@ -6,6 +6,7 @@ use App\Observers\BranchObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 
 #[ObservedBy(BranchObserver::class)]
@@ -45,5 +46,10 @@ class Branch extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function colleges(): HasMany
+    {
+        return $this->hasMany(College::class);
     }
 }

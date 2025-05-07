@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\CollegeController;
 use App\Http\Controllers\Api\EntityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,3 +18,4 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::apiResource('entities', EntityController::class)->except('destroy');
 Route::apiResource('branches', BranchController::class)->except('destroy');
+Route::apiResource('colleges', CollegeController::class)->except('destroy');

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Branch;
+use App\Models\College;
 use App\Models\Entity;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
@@ -68,8 +69,15 @@ function branch(?Entity $entity = null, ?User $user = null): Branch
 
     return Branch::factory()->create([
         'entity_id' => $entity->id,
-        'created_by' => $user->id,
-        'updated_by' => $user->id,
+    ]);
+}
+
+function college(?Branch $branch = null): College
+{
+    $branch ??= branch();
+
+    return College::factory()->create([
+        'branch_id' => $branch->id,
     ]);
 }
 
