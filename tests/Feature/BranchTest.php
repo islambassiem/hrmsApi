@@ -3,56 +3,135 @@
 use App\Models\Branch;
 use App\Models\Entity;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
-beforeEach(function () {
-    $this->user = User::factory()->create();
-    $this->url = 'api/v1/branches';
-});
 
-test('guest cannot access branches page', function () {
-    $this->getJson($this->url)->assertStatus(401);
-});
 
-test('guest cannot access single branch page', function () {
-    $entity = Entity::factory()->create();
-    $branch = Branch::factory()->create([
-        'entity_id' => $entity->id,
-    ]);
+/**
+ * Authentication Tests
+ */
+
+test('guest cannot access branches list', function () {
     $this
-        ->getJson($this->url.'/'.$branch->id)
+        ->getJson(route('branches.index'))
         ->assertStatus(401);
 });
 
-test('authenticated users cannot access branches page', function () {
+test('guest cannot access single branch page', function () {
+    $branch = branch();
     $this
-        ->actingAs($this->user)
-        ->getJson($this->url)
+        ->getJson(route('branches.show', $branch->id))
+        ->assertStatus(401);
+});
+
+test('guest cannot store a new branch', function () {
+    $this
+        ->postJson(route('branches.store'), [])
+        ->assertStatus(401);
+});
+
+test('guest cannot create branch with valid data', function () {
+    $barnch = branch()->toarray();
+    $this
+        ->postJson(route('branches.store'), $barnch)
+        ->assertStatus(401);
+});
+
+
+test('guest users cannot update branch', function () {
+    $branch = branch();
+    $this
+        ->putJson(route('branches.update', $branch->id), [])
+        ->assertStatus(401);
+});
+
+test('guest users cannot update branch with valid data', function () {
+    $branch = branch();
+    $this
+        ->putJson(route('branches.update', $branch->id), $branch->toArray())
+        ->assertStatus(401);
+});
+
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Authorization Test
+ */
+
+test('unauthorized users cannot access branches page', function () {
+    $user = user();
+    $this
+        ->actingAs($user)
+        ->getJson(route('branches.index'))
         ->assertStatus(403);
 });
 
-test('unauthenticated users cannot access single branch page', function () {
-    $entity = Entity::factory()->create();
-    $branch = Branch::factory()->create([
-        'entity_id' => $entity->id,
-    ]);
+test('unauthorized users cannot access single branch page', function () {
+    $user = user();
+    $branch = branch();
     $this
-        ->actingAs($this->user)
-        ->getJson($this->url.'/'.$branch->id)
+        ->actingAs($user)
+        ->getJson(route('branches.index', $branch->id))
         ->assertStatus(403);
+});
+
+test('unauthorized users cannot store a new branch', function (){
+    $this
+        ->actingAs(user())
+        ->postJson(route('branches.store', branch()->toArray()))
+        ->assertStatus(403);
+});
+
+test('unauthorized users cannot update branch', function () {
+    $user = user();
+    $branch = branch();
+    $this
+        ->actingAs($user)
+        ->putJson(route('branches.update', $branch->id), $branch->toArray())
+        ->assertStatus(403);
+});
+
+/**
+ * Authorized users
+ */
+
+test('authorized users can see no content branches page', function () {
+    $user = user();
+    assignAdmin($user);
+
+    $this
+        ->actingAs($user)
+        ->getJson(route('branches.index'))
+        ->assertStatus(200)
+        ->assertExactJsonStructure([
+            'message',
+        ]);
+});
+
+test('authorized users can access branches page', function () {
+    $user = user();
+    $branches = branch();
+    assignAdmin($user);
+
+    $this
+        ->actingAs($user)
+        ->getJson(route('branches.index'))
+        ->assertStatus(200)
+        ->assertJsonFragment([
+            'name_en' => $branches->name_en,
+            'name_ar' => $branches->name_ar,
+        ]);
 });
 
 test('authorized users can access single branch page', function () {
-    $entity = Entity::factory()->create();
-    $branch = Branch::factory()->create([
-        'entity_id' => $entity->id,
-    ]);
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
+    $user = user();
+    $branch = branch();
+    assignAdmin($user);
 
     $this
-        ->actingAs($this->user)
-        ->getJson($this->url.'/'.$branch->id)
+        ->actingAs($user)
+        ->getJson(route('branches.show', $branch->id))
         ->assertStatus(200)
         ->assertExactJsonStructure([
             'data' => [
@@ -78,116 +157,36 @@ test('authorized users can access single branch page', function () {
         ]);
 });
 
-test('authorized users can access branches page', function () {
-    $branches = Branch::factory()->create([
-        'entity_id' => Entity::factory()->create()->id,
-    ]);
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
+test('authenticated users can store a branch', function () {
+    $user = user();
+    assignAdmin($user);
+    $branch = branch()->toArray();
 
     $this
-        ->actingAs($this->user)
-        ->getJson($this->url)
-        ->assertStatus(200)
-        ->assertJsonFragment([
-            'name_en' => $branches->name_en,
-            'name_ar' => $branches->name_ar,
-        ]);
-});
-
-test('authorized users can see no content branches page...', function () {
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
-
-    $this
-        ->actingAs($this->user)
-        ->getJson($this->url)
-        ->assertStatus(200)
-        ->assertExactJsonStructure([
-            'message',
-        ]);
-});
-
-test('guest cannot create branch', function () {
-    $branch = Branch::factory()->create([
-        'entity_id' => Entity::factory()->create()->id,
-    ]);
-
-    $this
-        ->postJson($this->url, [])
-        ->assertStatus(401);
-});
-
-test('guest cannot create branch with valid data', function () {
-    $barnch = Branch::factory()->make([
-        'entity_id' => Entity::factory()->create()->id,
-    ])->toArray();
-    $this
-        ->postJson($this->url, $barnch)
-        ->assertStatus(401);
-});
-
-test('authenticated users can create branch', function () {
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
-    $branch = Branch::factory()->make([
-        'entity_id' => Entity::factory()->create()->id,
-        'created_by' => $this->user->id,
-        'updated_by' => $this->user->id,
-    ])->toArray();
-
-    $this
-        ->actingAs($this->user)
-        ->postJson($this->url, $branch)
+        ->actingAs($user)
+        ->postJson(route('branches.store'), $branch)
         ->assertStatus(201);
 });
 
-test('guest users cannot update branch', function () {
-    $entity_id = Entity::factory()->create()->id;
-    $branch = Branch::factory()->create([
-        'entity_id' => $entity_id,
-    ]);
+test('correct validation rules', function ($branch) {
+    $user = user();
+    assignAdmin($user);
+    entity();
     $this
-        ->putJson($this->url.'/'.$branch->id, [])
-        ->assertStatus(401);
-});
+        ->actingAs($user)
+        ->postJson(route('branches.store'), $branch)
+        ->assertStatus(422);
+})->with('branches');
 
-test('guest users cannot update branch with valid data', function () {
-    $branch = Branch::factory()->create([
-        'entity_id' => Entity::factory()->create()->id,
-    ]);
-    $data = Branch::factory()->make()->toArray();
-    $this
-        ->putJson($this->url.'/'.$branch->id, $data)
-        ->assertStatus(401);
-});
-
-test('unauthorized users cannot update branch', function () {
-    $branch = Branch::factory()->create([
-        'entity_id' => Entity::factory()->create()->id,]);
-    $data = Branch::factory()->make([])->toArray();
-    $this
-        ->actingAs($this->user)
-        ->putJson($this->url.'/'.$branch->id, $data)
-        ->assertStatus(403);
-});
 
 test('authorized users can update branch', function () {
-    $role = Role::create(['name' => 'admin']);
-    $this->user->assignRole($role->name);
-    $branch = Branch::factory()->create([
-        'entity_id' => Entity::factory()->create()->id,
-    ]);
-
-    $data = [
-        'name_en' => $branch->name_en,
-        'name_ar' => $branch->name_ar,
-        'code' => $branch->code,
-    ];
+    $user = user();
+    assignAdmin($user);
+    $branch = branch();
 
     $this
-        ->actingAs($this->user)
-        ->putJson($this->url.'/'.$branch->id, $data)
+        ->actingAs($user)
+        ->putJson(route('branches.update', $branch->id), $branch->toArray())
         ->assertStatus(200)
         ->assertExactJsonStructure([
             'data' => [
@@ -195,16 +194,6 @@ test('authorized users can update branch', function () {
                 'name_en',
                 'name_ar',
                 'code',
-                // 'entity' => [
-                //     'id',
-                //     'name_en',
-                //     'name_ar',
-                //     'code',
-                //     'created_by' => ['id', 'name', 'email'],
-                //     'updated_by' => ['id', 'name', 'email'],
-                //     'created_at',
-                //     'updated_at',
-                // ],
                 'created_by' => ['id', 'name', 'email'],
                 'updated_by' => ['id', 'name', 'email'],
                 'created_at',
@@ -212,3 +201,53 @@ test('authorized users can update branch', function () {
             ],
         ]);
 });
+
+
+function user(): User
+{
+    return User::factory()->create();
+}
+
+function entity()
+{
+    return Entity::factory()->create([
+        'created_by' => user()->id,
+        'updated_by' => user()->id,
+    ]);
+}
+
+function branch(): Branch
+{
+    return Branch::factory()->create([
+        'entity_id' => entity()->id,
+        'created_by' => user()->id,
+        'updated_by' => user()->id,
+    ]);
+}
+
+function assignAdmin(User $user): void
+{
+    $role = Role::create(['name' => 'admin']);
+    $user->assignRole($role->name);
+}
+
+dataset('branches', [
+    'all empty' => [
+        ['name_en' => '',
+        'name_ar' => '',
+        'code' => '',
+        'entity_id' => '',
+        'created_by' => '',
+        'updated_by' => ''
+        ]
+    ],
+    'all filled' => [
+        ['name_en' => Str::length(20),
+        'name_ar' => Str::length(50),
+        'code' => Str::length(10),
+        'entity_id' => 100,
+        'created_by' => 100,
+        'updated_by' => 100
+        ]
+    ],
+]);
