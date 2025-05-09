@@ -35,12 +35,12 @@ class MakeCrud extends Command
         ]);
 
         $this->call('make:policy', [
-            'name' => "$name" . 'Policy',
+            'name' => "$name".'Policy',
             '--model' => "App\\Models\\$name",
         ]);
 
         $this->call('make:observer', [
-            'name' => "$name" . 'Observer',
+            'name' => "$name".'Observer',
             '--model' => "App\\Models\\$name",
         ]);
 
@@ -58,6 +58,10 @@ class MakeCrud extends Command
             'name' => "V1\\Update{$name}Request",
         ]);
 
+        $this->call('make:resource', [
+            'name' => "V1\\{$name}Resource",
+        ]);
+
         $this->call('make:test', [
             'name' => "{$name}Test",
         ]);
@@ -67,7 +71,6 @@ class MakeCrud extends Command
         $this->makeFile('Store', $name, $this->StoreActionClass($name));
         $this->makeFile('Update', $name, $this->UpdateActionClass($name));
         $this->makeFile('Destroy', $name, $this->DestroyActionClass($name));
-
 
         $this->info('Full resource generated successfully.');
     }
