@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller implements HasMiddleware
@@ -21,9 +22,9 @@ class AuthController extends Controller implements HasMiddleware
 
     public function login(LoginFormRequest $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request['email'])->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request['password'], $user->password)) {
             return response()->json([
                 'error' => 'The Credientails are not correct',
             ], 422);
@@ -39,7 +40,7 @@ class AuthController extends Controller implements HasMiddleware
 
     public function logout()
     {
-        auth()->user()->tokens()->delete();
+        Auth::user()->tokens()->delete();
 
         return response()->noContent();
     }
