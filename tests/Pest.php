@@ -2,9 +2,9 @@
 
 use App\Models\Branch;
 use App\Models\College;
+use App\Models\Department;
 use App\Models\Entity;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +59,16 @@ function entity(?User $user = null): Entity
     return Entity::factory()->create([
         'created_by' => $user->id,
         'updated_by' => $user->id,
+    ]);
+}
+
+function department(?User $user = null): Department
+{
+    $user ??= user();
+
+    return Department::factory()->create([
+        'updated_by' => $user->id,
+        'created_by' => $user->id,
     ]);
 }
 

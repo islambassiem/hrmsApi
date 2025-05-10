@@ -4,8 +4,6 @@ use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-
-
 describe('Authentication', function () {
 
     test('guests cannot access colleges page', function () {

@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
@@ -18,14 +20,18 @@ class DatabaseSeeder extends Seeder
             EntitySeeder::class,
             BranchSeeder::class,
             CollegeSeeder::class,
+            DepartmentSeeder::class,
         ]);
 
-        Role::create(['name' => 'admin']);
+        $user = User::where('name', 'admin')->first();
+        $role = Role::create(['name' => 'admin']);
+        $user->assignRole($role->name);
 
         $this->call([
             EntityPermissionSeeder::class,
             BranchPermissionSeeder::class,
             CollegePermissionSeeder::class,
+            DepartmentPermissionsSeeder::class,
         ]);
     }
 }

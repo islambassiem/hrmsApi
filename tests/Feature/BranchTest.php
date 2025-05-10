@@ -4,7 +4,6 @@ use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-
 describe('Authentication', function () {
 
     test('guest cannot access branches index', function () {
@@ -262,7 +261,6 @@ dataset('branches', [
         ],
     ],
 ]);
-
 
 function giveAdminPermissionsToUserOnBranch($user)
 {

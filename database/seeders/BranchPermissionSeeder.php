@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -15,7 +14,7 @@ class BranchPermissionSeeder extends Seeder
     public function run(): void
     {
 
-        $role = Role::where('name', 'admin')->first(); 
+        $role = Role::where('name', 'admin')->first();
 
         Permission::create(['name' => 'view_any_branch']);
         Permission::create(['name' => 'view_branch']);
