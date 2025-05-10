@@ -9,7 +9,7 @@ class ShowEntityAction
 {
     public function handle(Entity $entity): Entity
     {
-        Gate::authorize('access', $entity);
+        Gate::authorize('view_entity', $entity);
 
         return $entity->load('createdBy', 'updatedBy');
     }

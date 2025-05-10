@@ -80,9 +80,3 @@ function college(?Branch $branch = null): College
         'branch_id' => $branch->id,
     ]);
 }
-
-function assignAdmin(User $user): void
-{
-    $role = Role::create(['name' => 'admin']);
-    $user->assignRole($role->name);
-}

@@ -10,7 +10,7 @@ class StoreEntityAction
 {
     public function handle(User $user, array $data): Entity
     {
-        Gate::authorize('access', Entity::class);
+        Gate::authorize('create_entity', Entity::class);
 
         $data['created_by'] = $user->id;
         $data['updated_by'] = $user->id;

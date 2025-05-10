@@ -11,7 +11,7 @@ class IndexCollegeAction
 {
     public function handle(): Collection
     {
-        Gate::authorize('viewAny', College::class);
+        Gate::authorize('view_any_college', College::class);
 
         return Cache::rememberForever('colleges', function () {
             return College::with('branch', 'createdBy', 'updatedBy')->get();

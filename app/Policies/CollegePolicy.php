@@ -12,7 +12,7 @@ class CollegePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAllRoles(['admin']);
+        return $user->hasPermissionTo('view_any_college');
     }
 
     /**
@@ -20,7 +20,7 @@ class CollegePolicy
      */
     public function view(User $user, College $college): bool
     {
-        return $user->hasAllRoles(['admin']);
+        return $user->hasPermissionTo('view_college', $college);
     }
 
     /**
@@ -28,7 +28,7 @@ class CollegePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAllRoles(['admin']);
+        return $user->hasPermissionTo('create_college');
     }
 
     /**
@@ -36,6 +36,30 @@ class CollegePolicy
      */
     public function update(User $user, College $college): bool
     {
-        return $user->hasAllRoles(['admin']);
+        return $user->hasPermissionTo('update_college', $college);
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, College $college): bool
+    {
+        return $user->hasPermissionTo('delete_college', $college);
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, College $college): bool
+    {
+        return $user->hasPermissionTo('restore_college', $college);
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, College $college): bool
+    {
+        return $user->hasPermissionTo('force_delete_college', $college);
     }
 }

@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+
 
 describe('Authentication', function () {
 
@@ -82,7 +86,7 @@ describe('authorized users', function () {
 
     test('authorized users can see no content message with empty page', function () {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnEntity($user);
         $this
             ->actingAs($user)
             ->getJson(route('entities.index'))
@@ -96,7 +100,7 @@ describe('authorized users', function () {
 
         $user = user();
         $entity = entity($user);
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnEntity($user);
         $this
             ->actingAs($user)
             ->getJson(route('entities.index'))
@@ -121,7 +125,7 @@ describe('authorized users', function () {
     test('authorized users can see a single entity page', function () {
         $user = user();
         $entity = entity($user);
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnEntity($user);
         $this
             ->actingAs($user)
             ->getJson(route('entities.show', $entity->id))
@@ -142,7 +146,7 @@ describe('authorized users', function () {
 
     test('authorized users cannot store entity with invalid data', function ($entity) {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnEntity($user);
 
         $this
             ->actingAs($user)
@@ -153,7 +157,7 @@ describe('authorized users', function () {
     test('authorized users can store entity with valid data', function () {
         $user = user();
         $entity = entity($user);
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnEntity($user);
         $this
             ->actingAs($user)
             ->postJson(route('entities.store'), $entity->toArray())
@@ -163,7 +167,7 @@ describe('authorized users', function () {
     test('authorized users cannot update an entity with invalid data', function () {
         $user = user();
         $entity = entity($user);
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnEntity($user);
         $data = [
             'name_en' => '',
             'name_ar' => '',
@@ -179,7 +183,7 @@ describe('authorized users', function () {
     test('authorized users can update an entity', function () {
         $user = user();
         $entity = entity($user);
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnEntity($user);
         $data = [
             'name_en' => 'name_en',
             'name_ar' => 'name_ar',
@@ -234,3 +238,26 @@ dataset('entities', [
         ],
     ],
 ]);
+
+function giveAdminPermissionsToUserOnEntity($user)
+{
+    $role = Role::create(['name' => 'admin']);
+
+    Permission::create(['name' => 'view_any_entity']);
+    Permission::create(['name' => 'view_entity']);
+    Permission::create(['name' => 'create_entity']);
+    Permission::create(['name' => 'update_entity']);
+    Permission::create(['name' => 'delete_entity']);
+    Permission::create(['name' => 'restore_entity']);
+    Permission::create(['name' => 'force_delete_entity']);
+
+    $user->assignRole($role->name);
+
+    $role->givePermissionTo('view_any_entity');
+    $role->givePermissionTo('view_entity');
+    $role->givePermissionTo('create_entity');
+    $role->givePermissionTo('update_entity');
+    $role->givePermissionTo('delete_entity');
+    $role->givePermissionTo('restore_entity');
+    $role->givePermissionTo('force_delete_entity');
+}

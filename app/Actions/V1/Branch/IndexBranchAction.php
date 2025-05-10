@@ -11,7 +11,7 @@ class IndexBranchAction
 {
     public function handle(): Collection
     {
-        Gate::authorize('access', Branch::class);
+        Gate::authorize('view_any_branch', Branch::class);
 
         return Cache::rememberForever('entities', function () {
             return Branch::with('entity', 'createdBy', 'updatedBy')->get();

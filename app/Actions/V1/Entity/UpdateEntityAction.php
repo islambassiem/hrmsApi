@@ -10,7 +10,7 @@ class UpdateEntityAction
 {
     public function handle(Entity $entity, User $user, array $data): Entity
     {
-        Gate::authorize('access', Entity::class);
+        Gate::authorize('update_entity', Entity::class);
         $data['updated_by'] = $user->id;
 
         $entity->update($data);

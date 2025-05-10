@@ -10,7 +10,7 @@ class UpdateCollegeAction
 {
     public function handle(array $attributes, College $college)
     {
-        Gate::authorize('update', $college);
+        Gate::authorize('update_college', $college);
 
         $attributes['updated_by'] = Auth::user()->id;
 

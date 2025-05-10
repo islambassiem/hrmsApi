@@ -9,7 +9,7 @@ class ShowCollegeAction
 {
     public function handle(College $college): College
     {
-        Gate::authorize('view', $college);
+        Gate::authorize('view_college', $college);
 
         return $college->load(['branch', 'createdBy', 'updatedBy']);
     }

@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+
 
 describe('Authentication', function () {
 
@@ -74,7 +78,7 @@ describe('authorized users', function () {
 
     test('authorized users can see no content message when there is no colleges', function () {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnCollege($user);
         $this
             ->actingAs($user)
             ->getJson(route('colleges.index'))
@@ -87,7 +91,7 @@ describe('authorized users', function () {
     test('authorized users can access colleges index', function () {
         $user = user();
         $college = college();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnCollege($user);
         $this
             ->actingAs($user)
             ->getJson(route('colleges.index'))
@@ -113,7 +117,7 @@ describe('authorized users', function () {
     test('authorized users can show a single college', function () {
         $user = user();
         $college = college();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnCollege($user);
 
         $this
             ->actingAs($user)
@@ -136,7 +140,7 @@ describe('authorized users', function () {
 
     test('authorized users can create a new college', function () {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnCollege($user);
         $college = college();
         $this
             ->actingAs($user)
@@ -156,7 +160,7 @@ describe('authorized users', function () {
 
     test('authenticated users can update a college', function () {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnCollege($user);
         $college = college();
         $this
             ->actingAs($user)
@@ -181,7 +185,7 @@ describe('authorized users', function () {
 
     test('authorized users cannot store invalid data', function ($colleges) {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnCollege($user);
         $this
             ->actingAs($user)
             ->postJson(route('colleges.store'), [$colleges])
@@ -190,7 +194,7 @@ describe('authorized users', function () {
 
     test('authorized users cannot update invalid data', function ($colleges) {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnCollege($user);
         $this
             ->actingAs($user)
             ->putJson(route('colleges.update', college()->id), [$colleges])
@@ -233,3 +237,26 @@ dataset('colleges', [
         ],
     ],
 ]);
+
+function giveAdminPermissionsToUserOnCollege($user)
+{
+    $role = Role::create(['name' => 'admin']);
+
+    Permission::create(['name' => 'view_any_college']);
+    Permission::create(['name' => 'view_college']);
+    Permission::create(['name' => 'create_college']);
+    Permission::create(['name' => 'update_college']);
+    Permission::create(['name' => 'delete_college']);
+    Permission::create(['name' => 'restore_college']);
+    Permission::create(['name' => 'force_delete_college']);
+
+    $user->assignRole($role->name);
+
+    $role->givePermissionTo('view_any_college');
+    $role->givePermissionTo('view_college');
+    $role->givePermissionTo('create_college');
+    $role->givePermissionTo('update_college');
+    $role->givePermissionTo('delete_college');
+    $role->givePermissionTo('restore_college');
+    $role->givePermissionTo('force_delete_college');
+}

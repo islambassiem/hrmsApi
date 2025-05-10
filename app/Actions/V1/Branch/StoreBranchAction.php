@@ -10,7 +10,7 @@ class StoreBranchAction
 {
     public function handle(User $user, array $attributes): Branch
     {
-        Gate::authorize('access', Branch::class);
+        Gate::authorize('create_branch', Branch::class);
 
         $attributes['updated_by'] = $user->id;
 

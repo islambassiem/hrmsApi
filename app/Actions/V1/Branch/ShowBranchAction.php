@@ -9,7 +9,7 @@ class ShowBranchAction
 {
     public function handle(Branch $branch)
     {
-        Gate::authorize('access', $branch);
+        Gate::authorize('view_branch', $branch);
 
         return $branch->load(['entity.createdBy', 'entity.updatedBy', 'createdBy', 'updatedBy']);
     }

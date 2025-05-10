@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
@@ -27,8 +28,5 @@ class UserSeeder extends Seeder
             'name' => 'hr',
             'email' => 'hr@example.com',
         ]);
-
-        $role = Role::create(['name' => 'admin']);
-        $admin->assignRole($role->name);
     }
 }

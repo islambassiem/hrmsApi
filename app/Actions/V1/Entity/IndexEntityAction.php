@@ -11,7 +11,7 @@ class IndexEntityAction
 {
     public function handle(): Collection
     {
-        Gate::authorize('access', Entity::class);
+        Gate::authorize('view_any_entity', Entity::class);
 
         return Cache::rememberForever('entities', function () {
             return Entity::with('createdBy', 'updatedBy')->get();

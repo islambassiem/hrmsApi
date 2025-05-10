@@ -10,7 +10,9 @@ class UpdateBranchAction
 {
     public function handle(User $user, Branch $branch, array $attributes): Branch
     {
-        Gate::authorize('access', $branch);
+        Gate::authorize('update_branch', $branch);
+
+        $attributes['updated_by'] = $user->id;
 
         $branch->update($attributes);
 

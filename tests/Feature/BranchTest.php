@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
 
 describe('Authentication', function () {
 
@@ -84,7 +87,7 @@ describe('authorized users', function () {
 
     test('authorized users can see no content branches page', function () {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnBranch($user);
 
         $this
             ->actingAs($user)
@@ -98,7 +101,7 @@ describe('authorized users', function () {
     test('authorized users can access branches page', function () {
         $user = user();
         $branches = branch(user: $user);
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnBranch($user);
 
         $this
             ->actingAs($user)
@@ -131,7 +134,7 @@ describe('authorized users', function () {
     test('authorized users can access single branch page', function () {
         $user = user();
         $branch = branch();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnBranch($user);
 
         $this
             ->actingAs($user)
@@ -163,7 +166,7 @@ describe('authorized users', function () {
 
     test('authenticated users can store a branch', function () {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnBranch($user);
         $branch = branch()->toArray();
 
         $this
@@ -174,7 +177,7 @@ describe('authorized users', function () {
 
     test('correct validation rules', function ($branch) {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnBranch($user);
         entity();
         $this
             ->actingAs($user)
@@ -184,7 +187,7 @@ describe('authorized users', function () {
 
     test('authorized users can update branch', function () {
         $user = user();
-        assignAdmin($user);
+        giveAdminPermissionsToUserOnBranch($user);
         $branch = branch();
 
         $this
@@ -259,3 +262,27 @@ dataset('branches', [
         ],
     ],
 ]);
+
+
+function giveAdminPermissionsToUserOnBranch($user)
+{
+    $role = Role::create(['name' => 'admin']);
+
+    Permission::create(['name' => 'view_any_branch']);
+    Permission::create(['name' => 'view_branch']);
+    Permission::create(['name' => 'create_branch']);
+    Permission::create(['name' => 'update_branch']);
+    Permission::create(['name' => 'delete_branch']);
+    Permission::create(['name' => 'restore_branch']);
+    Permission::create(['name' => 'force_delete_branch']);
+
+    $user->assignRole($role->name);
+
+    $role->givePermissionTo('view_any_branch');
+    $role->givePermissionTo('view_branch');
+    $role->givePermissionTo('create_branch');
+    $role->givePermissionTo('update_branch');
+    $role->givePermissionTo('delete_branch');
+    $role->givePermissionTo('restore_branch');
+    $role->givePermissionTo('force_delete_branch');
+}
