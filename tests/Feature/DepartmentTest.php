@@ -84,27 +84,17 @@ describe('Authorized users', function () {
             ->actingAs($user)
             ->getJson(route('departments.index'))
             ->assertStatus(200)
-            ->assertJsonCount(1, 'data');
-        // ->assertJson(
-        //     fn (AssertableJson $json) => $json->where('data.0.id', $department->id)
-        //         ->where('data.0.name_en', $department->name_en)
-        //         ->where('data.0.name_ar', $department->name_ar)
-        //         ->where('data.0.code', $department->code)
-        // )
-        // ->assertJsonPath('data.0.created_by')
-        // ->assertJsonPath('data.0.updated_by')
-        // ->assertJsonFragment([
-        //     'created_by' => [
-        //         'id',
-        //         'name',
-        //         'email',
-        //     ],
-        //     'updated_by' => [
-        //         'id',
-        //         'name',
-        //         'email',
-        //     ],
-        // ]);
+            ->assertJsonCount(1, 'data')
+            ->assertJson(
+                fn(AssertableJson $json) =>
+                $json->where('status', 'success')
+                    ->where('data.0.id', $department->id)
+                    ->where('data.0.name_en', $department->name_en)
+                    ->where('data.0.name_ar', $department->name_ar)
+                    ->where('data.0.code', $department->code)
+                    ->where('data.0.created_by', ['id' => $user->id, 'name' => $user->name, 'email' => $user->email])
+                    ->where('data.0.updated_by', ['id' => $user->id, 'name' => $user->name, 'email' => $user->email])
+            );
     });
 
     test('authorized users can see no content message when there is no departments', function () {
@@ -114,9 +104,9 @@ describe('Authorized users', function () {
             ->actingAs($user)
             ->getJson(route('departments.index'))
             ->assertStatus(200)
-            ->assertExactJsonStructure([
-                'status',
-                'message',
+            ->assertExactJson([
+                'status' => 'success',
+                'message' => 'No content',
             ]);
     });
 
@@ -155,13 +145,16 @@ describe('Authorized users', function () {
         $this
             ->actingAs($user)
             ->postJson(route('departments.store', $department))
-            ->assertStatus(201);
-        // ->assertJson(fn (AssertableJson $json) => $json->where('name_en', $department['name_en'])
-        //     ->where('name_ar', $department['name_ar'])
-        //     ->where('code', $department['code'])
-        //     ->whereType('created_by', 'array')
-        //     ->whereType('updated_by', 'array')
-        // );
+            ->assertStatus(201)
+            ->assertJson(fn (AssertableJson $json) =>
+                $json->where('status', 'success')
+                    ->where('data.name_en', $department['name_en'])
+                    ->where('data.name_ar', $department['name_ar'])
+                    ->where('data.code', $department['code'])
+                    ->where('data.created_at', date('Y-m-d'))
+                    ->where('data.created_by', ['id' => $user->id, 'name' => $user->name, 'email' => $user->email])
+                    ->where('data.updated_by', null)
+            );
     });
 
     test('authorized users can update a department', function () {
@@ -176,13 +169,15 @@ describe('Authorized users', function () {
                 'name_ar' => 'Updated Department Name in Arabic',
                 'code' => 'dept2',
             ])
-            ->assertStatus(200);
-        // ->assertJson(fn (AssertableJson $json) => $json->where('name_en', 'Updated Department Name in English')
-        //     ->where('name_ar', 'Updated Department Name in Arabic')
-        //     ->where('code', 'updated-dept')
-        //     ->whereType('created_by', 'array')
-        //     ->whereType('updated_by', 'array')
-        // );
+            ->assertStatus(200)
+            ->assertJson(fn (AssertableJson $json) =>
+                $json->where('status', 'success')
+                    ->where('data.name_en', 'Updated Department Name in English')
+                    ->where('data.name_ar', 'Updated Department Name in Arabic')
+                    ->where('data.code', 'dept2')
+                    ->whereType('data.created_by', 'array')
+                    ->where('data.updated_by', ['id' => $user->id, 'name' => $user->name,'email' => $user->email])
+        );
     });
 
     test('authorized users fail storing a department with invalid data', function ($departments) {
