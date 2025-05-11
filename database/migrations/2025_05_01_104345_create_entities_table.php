@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('code');
             $table->string('name_en');
             $table->string('name_ar');
-            $table->foreignIdFor(User::class, 'created_by');
-            $table->foreignIdFor(User::class, 'updated_by');
+            $table->foreignIdFor(User::class, 'created_by')->constrained();
+            $table->foreignIdFor(User::class, 'updated_by')->nullable()->constrained();
             $table->timestamps();
         });
     }
